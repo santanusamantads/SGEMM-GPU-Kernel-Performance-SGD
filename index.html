@@ -69,31 +69,27 @@
             </div>
         </section>
 
-        <!-- Interactive .ipynb Code Window (W3Schools Style) -->
+        <!-- Interactive .ipynb Notebook Workspace -->
         <section id="ipynb-workspace" class="card">
             <div class="workspace-header">
                 <h2>Interactive .ipynb Notebook Workspace</h2>
                 <span class="workspace-badge">Assignment2_SGD.ipynb</span>
             </div>
-            <p class="workspace-desc">Select notebook cells from your complete analysis pipeline below, inspect or modify code, and simulate execution.</p>
+            <p class="workspace-desc">Complete Jupyter notebook loaded dynamically with runnable cells, shared global state, dataset pre-loading, and live matplotlib figure rendering.</p>
             
-            <div class="notebook-container">
-                <div class="notebook-toolbar">
-                    <div class="cell-tabs" id="cellTabs">
-                        <!-- Dynamically populated via JS -->
-                    </div>
-                    <button id="runCellBtn" class="btn primary run-btn">▶ Run Cell</button>
+            <div class="notebook-top-bar">
+                <div class="notebook-actions">
+                    <button id="runAllBtn" class="btn primary">▶ Run All Cells</button>
+                    <button id="resetNotebookBtn" class="btn secondary">↺ Reset Notebook</button>
+                    <label class="fast-mode-label">
+                        <input type="checkbox" id="fastModeCheckbox"> Fast Mode (Epochs: 10)
+                    </label>
                 </div>
+                <div id="pyodideStatus" class="runtime-status">Python Runtime: Ready</div>
+            </div>
 
-                <div class="notebook-editor-pane">
-                    <div class="pane-label">Input (<span id="cellTypeLabel">Code</span>)</div>
-                    <textarea id="cellEditor" spellcheck="false"></textarea>
-                </div>
-
-                <div class="notebook-output-pane">
-                    <div class="pane-label">Output Console</div>
-                    <pre id="cellOutput">Output will appear here after running the cell...</pre>
-                </div>
+            <div id="notebookCellsContainer" class="notebook-stack-container">
+                <div class="loading-notice">Loading Assignment2_SGD.ipynb cells...</div>
             </div>
         </section>
 
