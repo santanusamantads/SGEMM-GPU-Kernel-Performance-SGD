@@ -145,7 +145,7 @@
   ],
   "files": [
     {
-      "filename": "Assignment2_SGD.ipynb",
+      "filename": "SGEMM_GPU_Kernel_SGD_Analysis.ipynb",
       "description": "Complete Jupyter notebook containing data preprocessing, custom SGD implementations, and plotting."
     },
     {

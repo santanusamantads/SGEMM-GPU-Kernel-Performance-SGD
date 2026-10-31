@@ -30,7 +30,7 @@ async function loadProjectData() {
         console.error("Error loading data.json, using fallback configuration.", error);
         populateBatchSelector([100, 200, 400, 800, 1000, 1600]);
         populateFileTable([
-            { filename: "Assignment2_SGD.ipynb", description: "Complete Jupyter notebook containing data preprocessing, custom SGD implementations, and plotting." },
+            { filename: "SGEMM_GPU_Kernel_SGD_Analysis.ipynb", description: "Complete Jupyter notebook containing data preprocessing, custom SGD implementations, and plotting." },
             { filename: "sgd_sgemm_analysis.py", description: "Standalone Python script version of complete SGD training pipeline." },
             { filename: "sgemm_product.csv", description: "Full SGEMM GPU Kernel Performance dataset (241,600 rows)." },
             { filename: "Readme_dataset.txt", description: "Original dataset description and source documentation." }

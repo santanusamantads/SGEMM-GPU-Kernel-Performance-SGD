@@ -24,7 +24,7 @@ Two SGD strategies are implemented completely from scratch using Python/NumPy:
 ## Repository Structure
 | Filename | Description |
 | :--- | :--- |
-| [`Assignment2_SGD.ipynb`](Assignment2_SGD.ipynb) | Complete Jupyter notebook containing data preprocessing, custom SGD implementations, and plotting[cite: 1]. |
+| [`SGEMM_GPU_Kernel_SGD_Analysis.ipynb`](SGEMM_GPU_Kernel_SGD_Analysis.ipynb) | Complete Jupyter notebook containing data preprocessing, custom SGD implementations, and plotting[cite: 1]. |
 | [`sgd_sgemm_analysis.py`](sgd_sgemm_analysis.py) | Standalone Python script version of the complete SGD training pipeline. |
 | [`sgemm_product.csv`](sgemm_product.csv) | The full SGEMM GPU Kernel Performance dataset (241,600 rows)[cite: 1, 2]. |
 | [`Readme_dataset.txt`](Readme_dataset.txt) | Original dataset description and source documentation[cite: 2]. |
