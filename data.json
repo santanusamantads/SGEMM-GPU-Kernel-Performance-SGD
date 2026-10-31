@@ -1,0 +1,60 @@
+{
+  "project": {
+    "title": "SGEMM GPU Kernel Performance - Stochastic Gradient Descent (SGD)",
+    "description": "Stochastic Gradient Descent (SGD) implementation from scratch (Random With Replacement vs. Random Without Replacement) on the SGEMM GPU Kernel Performance dataset across various batch sizes.",
+    "repository": "https://github.com/santanusamantads/SGEMM-GPU-Kernel-Performance-SGD",
+    "author": "Santanu Samanta"
+  },
+  "dataset": {
+    "name": "SGEMM GPU Kernel Performance Dataset",
+    "instances": 241600,
+    "features": 14,
+    "target": "Log-transformed and averaged execution time (Run1 to Run4 in ms)",
+    "attributes": [
+      "Matrix Tiling Parameters",
+      "Work-group Sizes",
+      "Local Memory Shapes",
+      "Loop Unrolling Factors",
+      "Vector Widths",
+      "Strides & Manual Caching"
+    ]
+  },
+  "hyperparameters": {
+    "learning_rate": 0.0005,
+    "epochs": 100,
+    "batch_sizes": [100, 200, 400, 800, 1000, 1600]
+  },
+  "results": {
+    "test_mse": 0.2790,
+    "strategies": [
+      {
+        "id": "replacement",
+        "name": "Random With Replacement",
+        "description": "Batches are sampled randomly with replacement during each epoch."
+      },
+      {
+        "id": "without_replacement",
+        "name": "Random Without Replacement",
+        "description": "Data indices are shuffled randomly at the start of each epoch and traversed sequentially without replacement."
+      }
+    ]
+  },
+  "files": [
+    {
+      "filename": "Assignment2_SGD.ipynb",
+      "description": "Complete Jupyter notebook containing data preprocessing, custom SGD implementations, and plotting."
+    },
+    {
+      "filename": "sgd_sgemm_analysis.py",
+      "description": "Standalone Python script version of the complete SGD training pipeline."
+    },
+    {
+      "filename": "sgemm_product.csv",
+      "description": "The full SGEMM GPU Kernel Performance dataset (241,600 rows)."
+    },
+    {
+      "filename": "Readme_dataset.txt",
+      "description": "Original dataset description and source documentation."
+    }
+  ]
+}

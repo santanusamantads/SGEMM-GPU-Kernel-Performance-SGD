@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGEMM GPU Kernel Performance - SGD Analysis</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="hero">
+        <div class="container">
+            <span class="badge">Machine Learning & GPU Optimization</span>
+            <h1>SGEMM GPU Kernel Performance</h1>
+            <p class="subtitle">Stochastic Gradient Descent (SGD) from Scratch (With vs. Without Replacement)</p>
+            <div class="hero-actions">
+                <a href="https://github.com/santanusamantads/SGEMM-GPU-Kernel-Performance-SGD" target="_blank" class="btn primary">View on GitHub</a>
+                <a href="#results" class="btn secondary">Explore Results</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container main-content">
+        <!-- Overview Section -->
+        <section id="overview" class="card">
+            <h2>Project Overview</h2>
+            <p>This project implements Stochastic Gradient Descent (SGD) completely from scratch in NumPy to model and predict GPU kernel execution performance using the high-dimensional SGEMM dataset.</p>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h3 id="stat-instances">241,600</h3>
+                    <p>Dataset Instances</p>
+                </div>
+                <div class="stat-box">
+                    <h3 id="stat-features">14</h3>
+                    <p>GPU Parameter Features</p>
+                </div>
+                <div class="stat-box">
+                    <h3 id="stat-mse">~0.2790</h3>
+                    <p>Test MSE</p>
+                </div>
+                <div class="stat-box">
+                    <h3 id="stat-epochs">100</h3>
+                    <p>Training Epochs</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Optimization Strategies -->
+        <section id="strategies" class="card">
+            <h2>Optimization Strategies</h2>
+            <div class="strategies-grid">
+                <div class="strategy-card">
+                    <h3>Strategy 1</h3>
+                    <h4>Random With Replacement</h4>
+                    <p>Batches are sampled randomly with replacement during each epoch iteration.</p>
+                </div>
+                <div class="strategy-card">
+                    <h3>Strategy 2</h3>
+                    <h4>Random Without Replacement</h4>
+                    <p>Data indices are shuffled randomly at the start of each epoch and traversed sequentially without replacement.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experiment Setup & Interactive Batch Explorer -->
+        <section id="experiments" class="card">
+            <h2>Experiment Configuration & Batch Testing</h2>
+            <p>Select a batch size configuration evaluated in the analysis pipeline:</p>
+            <div class="batch-selector" id="batchButtons">
+                <!-- Dynamically populated via JS -->
+            </div>
+            <div class="config-display" id="configDisplay">
+                <p><strong>Learning Rate ($\alpha$):</strong> 0.0005</p>
+                <p><strong>Epochs:</strong> 100</p>
+                <p><strong>Selected Batch Size:</strong> <span id="selectedBatch">100</span></p>
+                <p><strong>Observed Test MSE:</strong> 0.2790</p>
+            </div>
+        </section>
+
+        <!-- Repository Structure -->
+        <section id="files" class="card">
+            <h2>Repository Structure & Files</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Filename</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fileTableBody">
+                        <!-- Dynamically populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Dataset References -->
+        <section id="references" class="card">
+            <h2>Dataset Attribution & References</h2>
+            <ul>
+                <li>Rafael Ballester-Ripoll, Enrique G. Paredes, and Renato Pajarola. <em>"Sobol Tensor Trains for Global Sensitivity Analysis"</em>. arXiv preprint arXiv:1712.00233, 2017.</li>
+                <li>Cedric Nugteren and Valeriu Codreanu. <em>"CLTune: A Generic Auto-Tuner for OpenCL Kernels"</em>. 9th International Symposium on Embedded Multicore/Many-core Systems-on-Chip (MCSoC). IEEE, 2015.</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Santanu Samanta. SGEMM GPU Kernel Performance Project.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
