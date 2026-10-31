@@ -69,27 +69,29 @@
             </div>
         </section>
 
-        <!-- Interactive .ipynb Notebook Workspace -->
+        <!-- Interactive .ipynb Notebook Workspace (Google Colab Style) -->
         <section id="ipynb-workspace" class="card">
             <div class="workspace-header">
                 <h2>Interactive .ipynb Notebook Workspace</h2>
                 <span class="workspace-badge">Assignment2_SGD.ipynb</span>
             </div>
-            <p class="workspace-desc">Complete Jupyter notebook loaded dynamically with runnable cells, shared global state, dataset pre-loading, and live matplotlib figure rendering.</p>
+            <p class="workspace-desc">Run, inspect, and modify this notebook live in the cloud via Google Colab with full GPU support and zero local setup.</p>
             
-            <div class="notebook-top-bar">
-                <div class="notebook-actions">
-                    <button id="runAllBtn" class="btn primary">▶ Run All Cells</button>
-                    <button id="resetNotebookBtn" class="btn secondary">↺ Reset Notebook</button>
-                    <label class="fast-mode-label">
-                        <input type="checkbox" id="fastModeCheckbox"> Fast Mode (Epochs: 10)
-                    </label>
+            <div class="colab-embed-container">
+                <div class="colab-card-content">
+                    <div class="colab-info">
+                        <h3>Assignment2_SGD.ipynb</h3>
+                        <p>Explore the complete stochastic gradient descent pipeline, custom NumPy implementations, training visualizations, and SGEMM GPU benchmark comparisons directly in a hosted Jupyter runtime.</p>
+                    </div>
+                    <div class="colab-actions">
+                        <!-- Official Open in Colab Badge -->
+                        <a href="https://colab.research.google.com/github/santanusamantads/SGEMM-GPU-Kernel-Performance-SGD/blob/main/Assignment2_SGD.ipynb" target="_blank" class="colab-launch-btn">
+                            <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+                            <span>Open in Google Colab</span>
+                        </a>
+                        <a href="https://github.com/santanusamantads/SGEMM-GPU-Kernel-Performance-SGD/blob/main/Assignment2_SGD.ipynb" target="_blank" class="btn secondary">View Source on GitHub</a>
+                    </div>
                 </div>
-                <div id="pyodideStatus" class="runtime-status">Python Runtime: Ready</div>
-            </div>
-
-            <div id="notebookCellsContainer" class="notebook-stack-container">
-                <div class="loading-notice">Loading Assignment2_SGD.ipynb cells...</div>
             </div>
         </section>
 
