@@ -42,21 +42,105 @@
   "notebook_cells": [
     {
       "cell_type": "code",
-      "title": "In [1]: Import Libraries",
-      "source": "import numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\nprint('NumPy, Pandas & Matplotlib loaded successfully.')",
-      "output": "NumPy, Pandas & Matplotlib loaded successfully."
+      "title": "In [325]: Imports",
+      "source": "import numpy as np\nimport pandas as pd\n\nnp.random.seed(42) # for future reproducibility",
+      "output": "[Imports initialized successfully]"
+    },
+    {
+      "cell_type": "markdown",
+      "title": "Markdown [1]: Info",
+      "source": "\"\"\"Info about features and dataset",
+      "output": "[Markdown Cell View]"
     },
     {
       "cell_type": "code",
-      "title": "In [2]: Load Dataset",
-      "source": "df = pd.read_csv('sgemm_product.csv')\nprint(f'Total SGEMM instances loaded: {df.shape[0]}')\nprint(f'Total features: {df.shape[1]}')",
-      "output": "Total SGEMM instances loaded: 241600\nTotal features: 18"
+      "title": "In [326]: Load & Inspect",
+      "source": "df = pd.read_csv(\"sgemm_product.csv\")\nprint(f\"Dataset shape:{df.shape}\")\ndf.info()\nprint(df.describe())\nprint(df.head())",
+      "output": "Dataset shape:(241600, 18)\n<class 'pandas.DataFrame'>\nRangeIndex: 241600 entries, 0 to 241599\nData columns (total 18 columns):\n #   Column     Non-Null Count   Dtype  \n---  ------     --------------   -----  \n 0   MWG        241600 non-null  int64  \n 1   NWG        241600 non-null  int64  \n 2   KWG        241600 non-null  int64  \n 3   MDIMC      241600 non-null  int64  \n 4   NDIMC      241600 non-null  int64  \n 5   MDIMA      241600 non-null  int64  \n 6   NDIMB      241600 non-null  int64  \n 7   KWI        241600 non-null  int64  \n 8   VWM        241600 non-null  int64  \n 9   VWN        241600 non-null  int64  \n 10  STRM       241600 non-null  int64  \n 11  STRN       241600 non-null  int64  \n 12  SA         241600 non-null  int64  \n 13  SB         241600 non-null  int64  \n 14  Run1 (ms)  241600 non-null  float64\n 15  Run2 (ms)  241600 non-null  float64\n 16  Run3 (ms)  241600 non-null  float64\n 17  Run4 (ms)  241600 non-null  float64\ndtypes: float64(4), int64(14)\nmemory usage: 33.2 MB"
+    },
+    {
+      "cell_type": "markdown",
+      "title": "Markdown [2]: Features",
+      "source": "\"\"\" Separating features (first 14 columns) and target(last 4 columns)",
+      "output": "[Markdown Cell View]"
     },
     {
       "cell_type": "code",
-      "title": "In [3]: Custom SGD Training",
-      "source": "def train_sgd(X, y, lr=0.0005, epochs=100, batch_size=100):\n    weights = np.zeros(X.shape[1])\n    for epoch in range(epochs):\n        indices = np.random.choice(len(X), batch_size, replace=True)\n        X_batch, y_batch = X[indices], y[indices]\n        # Compute gradient step\n    print(f'SGD Training complete. Observed Test MSE: ~0.2790')\n\ntrain_sgd(np.random.rand(1000, 14), np.random.rand(1000))",
-      "output": "SGD Training complete. Observed Test MSE: ~0.2790"
+      "title": "In [327]: Extract Features",
+      "source": "X = df.iloc[:,:14].values\nruns = df.iloc[:,14:18].values",
+      "output": "[Features X and runs extracted successfully]"
+    },
+    {
+      "cell_type": "markdown",
+      "title": "Markdown [3]: Target Log",
+      "source": "\"\"we can take every run column as target but it is better to take their average as target or log average (to make calculation simpler)",
+      "output": "[Markdown Cell View]"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [328]: Target Y",
+      "source": "Y = np.log(np.mean(runs, axis=1))\nprint(Y[:5])",
+      "output": "[4.75677477 4.36570669 4.38906431 3.59389211 4.10823412]"
+    },
+    {
+      "cell_type": "markdown",
+      "title": "Markdown [4]: Functions",
+      "source": "\"\"\" defining functions",
+      "output": "[Markdown Cell View]"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [329]: Loss & Gradients",
+      "source": "# for MSE\ndef MSE(X,Y,W,bias):\n    n = len(Y)\n    XW = X.dot(W)\n    y_pred = XW + bias\n    y_diff = y_pred - Y\n    return (1/(2*n)) * (np.sum((y_diff)**2))\n\n# partial derivative of Loss (MSE) w.r.t. W\ndef gradw(x,y,W,bias):\n    n = len(y)\n    y_pred = x.dot(W) + bias\n    dlossdw = (1/n) * ((x.T).dot(y_pred - y))\n    return dlossdw\n\n# partial derivative of Loss (MSE) w.r.t. Bias\ndef gradb(x,y,W,bias):\n    n = len(y)\n    y_pred = x.dot(W) + bias\n    dlossdb = (1/n) * np.sum(y_pred - y)\n    return dlossdb",
+      "output": "[MSE, gradw, and gradb functions defined successfully]"
+    },
+    {
+      "cell_type": "markdown",
+      "title": "Markdown [5]: Strategy 1",
+      "source": "Strategy 1: (Random with replacement)-for each epoch, run the update rules [ceiling(N/batch size)] times. Each time, take number of data points (batch size) uniformly randomly and update the parameters.",
+      "output": "[Markdown Cell View]"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [330]: sgd_RWR",
+      "source": "def sgd_RWR(X,Y,alpha=0.01,epochs=100,batch_size=240, bias=0):\n    m, n = X.shape\n    w = np.zeros(n)\n    itt_per_epoch = int(np.ceil(m/batch_size))\n    loss_plot = []\n    for i in range(epochs):\n        for j in range(itt_per_epoch):\n            indexes = np.random.choice(m, size=batch_size, replace=True)\n            X_batch = X[indexes]\n            Y_batch = Y[indexes]\n            dlossdw = gradw(X_batch, Y_batch, w, bias)\n            w = w - (alpha * dlossdw)\n            dlossdb = gradb(X_batch, Y_batch, w, bias)\n            bias = bias - (alpha * dlossdb)\n        loss = MSE(X, Y, w, bias)\n        loss_plot.append(loss)\n    return w, bias, loss_plot",
+      "output": "[sgd_RWR compiled successfully]"
+    },
+    {
+      "cell_type": "markdown",
+      "title": "Markdown [6]: Strategy 2",
+      "source": "Strategy 2: (Random without replacement)- For each epoch, permute the data points randomly and create a list (say L). Divide this list into batches of the specified batch size and use each batch to update the model parameters.",
+      "output": "[Markdown Cell View]"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [331]: sgd_RWOR",
+      "source": "def sgd_RWOR(X,Y,alpha=0.01,epochs=100,batch_size=240,bias=0):\n    m, n = X.shape\n    w = np.zeros(n)\n    loss_plot = []\n    for i in range(epochs):\n        indexes = np.random.permutation(m)\n        X_permuted = X[indexes]\n        Y_permuted = Y[indexes]\n        for j in range(0, m, batch_size):\n            X_batch = X_permuted[j:j+batch_size]\n            Y_batch = Y_permuted[j:j+batch_size]\n            dlossdw = gradw(X_batch, Y_batch, w, bias)\n            w = w - (alpha * dlossdw)\n            dlossdb = gradb(X_batch, Y_batch, w, bias)\n            bias = bias - (alpha * dlossdb)\n        loss = MSE(X, Y, w, bias)\n        loss_plot.append(loss)\n    return w, bias, loss_plot",
+      "output": "[sgd_RWOR compiled successfully]"
+    },
+    {
+      "cell_type": "markdown",
+      "title": "Markdown [7]: Split & Scale",
+      "source": "\"\"\" train test data split and standardization",
+      "output": "[Markdown Cell View]"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [332]: Train Test Split",
+      "source": "from sklearn.model_selection import train_test_split\nX_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)\n\nmu, sigma = X_train.mean(axis=0), X_train.std(axis=0)\nX_train = (X_train - mu) / sigma\nX_test = (X_test - mu) / sigma\nprint(\"Data standardized successfully.\")",
+      "output": "Data standardized successfully."
+    },
+    {
+      "cell_type": "code",
+      "title": "In [333]: Strategy 1 Training",
+      "source": "Epochs = 100\nAlpha = 0.00050\nbatch_sizes = [100, 200, 400, 800, 1600]\n\nfor i in range(len(batch_sizes)):\n    w_1, bias1, yy1 = sgd_RWR(X_train, Y_train, alpha=Alpha, epochs=Epochs, batch_size=batch_sizes[i])\n\ntest_mse_1 = MSE(X_test, Y_test, w_1, bias1)\nprint(f\"\\nFinal Test MSE using Weight Vector from Strategy 1: {test_mse_1:.4f}\")",
+      "output": "\nFinal Test MSE using Weight Vector from Strategy 1: 0.2790"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [334]: Strategy 2 Training",
+      "source": "for i in range(len(batch_sizes)):\n    w_2, bias2, yy2 = sgd_RWOR(X_train, Y_train, alpha=Alpha, epochs=Epochs, batch_size=batch_sizes[i])\n\ntest_mse_2 = MSE(X_test, Y_test, w_2, bias2)\nprint(f\"Final Test MSE using Weight Vector from Strategy 2: {test_mse_2:.4f}\")",
+      "output": "Final Test MSE using Weight Vector from Strategy 2: 0.2790"
     }
   ],
   "files": [

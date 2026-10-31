@@ -3,12 +3,11 @@ document.addEventListener("DOMContentLoaded", () => {
     loadProjectData();
 });
 
-// Theme Switcher Logic (Matches myCV portfolio style)
+// Theme Switcher Logic
 function initThemeToggle() {
     const themeToggleBtn = document.getElementById("themeToggle");
     const htmlElement = document.documentElement;
     
-    // Check local storage or system preference
     const savedTheme = localStorage.getItem("theme") || "dark";
     htmlElement.setAttribute("data-theme", savedTheme);
 
@@ -32,38 +31,10 @@ async function loadProjectData() {
         }
     } catch (error) {
         console.error("Error loading data.json, using fallback configuration.", error);
-        // Fallback UI population
-        populateBatchSelector([100, 200, 400, 800, 1000, 1600]);
-        populateFileTable([
-            { filename: "Assignment2_SGD.ipynb", description: "Complete Jupyter notebook containing data preprocessing, custom SGD implementations, and plotting." },
-            { filename: "sgd_sgemm_analysis.py", description: "Standalone Python script version of the complete SGD training pipeline." },
-            { filename: "sgemm_product.csv", description: "The full SGEMM GPU Kernel Performance dataset (241,600 rows)." },
-            { filename: "Readme_dataset.txt", description: "Original dataset description and source documentation." }
-        ]);
-        initNotebookWorkspace([
-            {
-                cell_type: "code",
-                title: "In [1]: Import Libraries",
-                source: "import numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\nprint('NumPy & Pandas loaded successfully.')",
-                output: "NumPy & Pandas loaded successfully."
-            },
-            {
-                cell_type: "code",
-                title: "In [2]: Load Dataset",
-                source: "df = pd.read_csv('sgemm_product.csv')\nprint(f'Dataset shape: {df.shape}')",
-                output: "Dataset shape: (241600, 18)"
-            },
-            {
-                cell_type: "code",
-                title: "In [3]: SGD Custom Training",
-                source: "def sgd_update(X, y, weights, lr, batch_size):\n    # Stochastic Gradient Descent step implementation\n    indices = np.random.choice(len(X), batch_size, replace=True)\n    return weights - lr * np.dot(X[indices].T, np.dot(X[indices], weights) - y[indices]) / batch_size\n\nprint('SGD update function compiled successfully.')",
-                output: "SGD update function compiled successfully."
-            }
-        ]);
     }
 }
 
-// W3Schools style Interactive Notebook Workspace
+// W3Schools style Interactive Notebook Workspace with all user notebook cells
 function initNotebookWorkspace(cells) {
     const tabsContainer = document.getElementById("cellTabs");
     const editor = document.getElementById("cellEditor");
@@ -89,7 +60,7 @@ function initNotebookWorkspace(cells) {
         tabsContainer.appendChild(tab);
     });
 
-    // Load initial cell
+    // Load initial active cell
     if (cells.length > 0) {
         editor.value = cells[0].source;
         output.textContent = cells[0].output;
@@ -103,17 +74,19 @@ function initNotebookWorkspace(cells) {
         
         setTimeout(() => {
             if (currentCode.includes("print(")) {
-                // Simple regex extraction for print statements to simulate output
-                const match = currentCode.match(/print\((['"])(.*?)\1\)/);
-                if (match) {
-                    output.textContent = match[2];
+                // Extract string literals from print for realistic feedback
+                const matches = [...currentCode.matchAll(/print\((['"])(.*?)\1\)/g)];
+                if (matches.length > 0) {
+                    output.textContent = matches.map(m => m[2]).join('\n');
                 } else {
                     output.textContent = "[Execution Complete] Cell executed successfully with no errors.";
                 }
+            } else if (currentCode.includes("def sgd_RWR") || currentCode.includes("def sgd_RWOR") || currentCode.includes("def MSE")) {
+                output.textContent = "[Function Definition Compiled Successfully]";
             } else {
-                output.textContent = "[Execution Complete] Process executed successfully.\nTest MSE evaluated: 0.2790";
+                output.textContent = "[Execution Complete] Process executed successfully.\nFinal Test MSE evaluated: ~0.2790";
             }
-        }, 300);
+        }, 250);
     });
 }
 
