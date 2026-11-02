@@ -220,6 +220,108 @@ body {
     margin-bottom: 10px;
 }
 
+/* GfG Style Math & Code Breakdown Styles */
+.gfg-header {
+    margin-bottom: 20px;
+}
+
+.gfg-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(40, 167, 69, 0.15);
+    color: #2ea043;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.gfg-subtitle {
+    font-size: 0.95rem;
+    opacity: 0.8;
+}
+
+.gfg-accordion-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.gfg-item {
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 20px;
+}
+
+.gfg-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.gfg-item-header h3 {
+    color: var(--text-heading);
+    font-size: 1.15rem;
+}
+
+.gfg-ref-tag {
+    font-size: 0.8rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 3px 8px;
+    border-radius: 4px;
+    opacity: 0.85;
+}
+
+.gfg-item-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.gfg-block h4 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: var(--accent-color);
+    margin-bottom: 8px;
+}
+
+.gfg-block p {
+    font-size: 0.92rem;
+    opacity: 0.85;
+    margin-bottom: 10px;
+}
+
+.gfg-formula {
+    background: var(--card-bg);
+    padding: 10px 14px;
+    border-radius: 4px;
+    border-left: 3px solid var(--accent-color);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+}
+
+.gfg-block pre {
+    background: var(--output-bg);
+    padding: 12px;
+    border-radius: 4px;
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+}
+
+.gfg-block pre code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
 /* Google Colab Workspace Card Styles */
 .workspace-header {
     display: flex;
