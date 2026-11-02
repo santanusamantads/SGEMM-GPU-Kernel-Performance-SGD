@@ -39,34 +39,125 @@
       }
     ]
   },
-  "gfg_breakdown_sections": [
+  "notebook_cells": [
     {
-      "id": "loss-function",
-      "title": "1. Loss Function: Mean Squared Error (MSE)",
-      "intuition": "To measure how well our linear model predicts GPU kernel runtime execution, we calculate the Average Mean Squared Error. Including the scaling factor 1/(2n) elegantly simplifies the derivative calculation during backpropagation.",
-      "formula": "L = (1 / 2n) * \\sum (y_{pred} - y_{true})^2",
-      "code_snippet": "def MSE(X, Y, W, bias):\n    n = len(Y)\n    y_pred = X.dot(W) + bias\n    y_diff = y_pred - Y\n    return (1 / (2 * n)) * np.sum(y_diff ** 2)"
+      "cell_type": "code",
+      "title": "In [325]: Imports & Setup",
+      "source": "import numpy as np\nimport pandas as pd\n\nnp.random.seed(42) # for future reproducibility",
+      "intuition": "Imports core numerical and data manipulation libraries, locking the random seed for reproducible stochastic initialization.",
+      "output": "[Imports initialized successfully]"
     },
     {
-      "id": "gradient-derivatives",
-      "title": "2. Gradient Derivation (Weights & Bias)",
-      "intuition": "Using chain rule calculus, we compute partial derivatives of the Mean Squared Error loss with respect to weight vector W and scalar bias. This determines the steepest direction of error increase, which we subtract during parameter updates.",
-      "formula": "∂L / ∂W = (1 / n) * X^T (y_{pred} - Y),     ∂L / ∂b = (1 / n) * \\sum (y_{pred} - Y)",
-      "code_snippet": "def gradw(x, y, W, bias):\n    n = len(y)\n    y_pred = x.dot(W) + bias\n    return (1 / n) * (x.T.dot(y_pred - y))\n\ndef gradb(x, y, W, bias):\n    n = len(y)\n    y_pred = x.dot(W) + bias\n    return (1 / n) * np.sum(y_pred - y)"
+      "cell_type": "markdown",
+      "title": "Markdown [1]: Dataset Info",
+      "source": "Info about features and dataset structure.",
+      "intuition": "Markdown documentation outlining feature descriptions and dataset properties.",
+      "output": "[Markdown Cell View]"
     },
     {
-      "id": "strategy-replacement",
-      "title": "3. SGD Strategy 1: Random With Replacement",
-      "intuition": "In Random With Replacement, sample indices are drawn uniformly at random with replacement using np.random.choice(). This models a true probabilistic sampling process where individual instances can appear multiple times per epoch.",
-      "formula": "Index k ~ Uniform(1, m) with replacement for k in [1, ceiling(m / batch_size)]",
-      "code_snippet": "def sgd_RWR(X, Y, alpha=0.01, epochs=100, batch_size=240, bias=0):\n    m, n = X.shape\n    w = np.zeros(n)\n    itt_per_epoch = int(np.ceil(m / batch_size))\n    loss_plot = []\n    for i in range(epochs):\n        for j in range(itt_per_epoch):\n            indexes = np.random.choice(m, size=batch_size, replace=True)\n            X_batch, Y_batch = X[indexes], Y[indexes]\n            w -= alpha * gradw(X_batch, Y_batch, w, bias)\n            bias -= alpha * gradb(X_batch, Y_batch, w, bias)\n        loss_plot.append(MSE(X, Y, w, bias))\n    return w, bias, loss_plot"
+      "cell_type": "code",
+      "title": "In [326]: Load & Inspect Dataset",
+      "source": "df = pd.read_csv(\"sgemm_product.csv\")\nprint(f\"Dataset shape:{df.shape}\")\ndf.info()\nprint(df.describe())\nprint(df.head())",
+      "intuition": "Loads the 241,600-row SGEMM dataset via Pandas, verifying dimensions, data types, and summary statistics.",
+      "output": "Dataset shape:(241600, 18)\n<class 'pandas.DataFrame'>\nRangeIndex: 241600 entries, 0 to 241599\nData columns (total 18 columns):\n ..."
     },
     {
-      "id": "strategy-without-replacement",
-      "title": "4. SGD Strategy 2: Random Without Replacement",
-      "intuition": "Random Without Replacement shuffles the dataset indices once at the beginning of every epoch using np.random.permutation(). Traversing sequential chunks guarantees every sample is visited exactly once per epoch, lowering variance.",
-      "formula": "Permutation π = Shuffle([1, ..., m]), Batch j = X[j : j + batch_size]",
-      "code_snippet": "def sgd_RWOR(X, Y, alpha=0.01, epochs=100, batch_size=240, bias=0):\n    m, n = X.shape\n    w = np.zeros(n)\n    loss_plot = []\n    for i in range(epochs):\n        indexes = np.random.permutation(m)\n        X_perm, Y_perm = X[indexes], Y[indexes]\n        for j in range(0, m, batch_size):\n            X_batch = X_perm[j:j+batch_size]\n            Y_batch = Y_perm[j:j+batch_size]\n            w -= alpha * gradw(X_batch, Y_batch, w, bias)\n            bias -= alpha * gradb(X_batch, Y_batch, w, bias)\n        loss_plot.append(MSE(X, Y, w, bias))\n    return w, bias, loss_plot"
+      "cell_type": "markdown",
+      "title": "Markdown [2]: Feature Extraction",
+      "source": "Separating features (first 14 columns) and target (last 4 execution runs).",
+      "intuition": "Isolates hardware tuning parameters from execution time benchmarks.",
+      "output": "[Markdown Cell View]"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [327]: Extract Features",
+      "source": "X = df.iloc[:,:14].values\nruns = df.iloc[:,14:18].values",
+      "intuition": "Extracts NumPy matrices for the 14 GPU tuning features (X) and the 4 benchmark runs.",
+      "output": "[Features X and runs extracted successfully]"
+    },
+    {
+      "cell_type": "markdown",
+      "title": "Markdown [3]: Target Transformation",
+      "source": "Taking the log average of run columns to stabilize variance and simplify calculations.",
+      "intuition": "Logarithmic transformation compresses the skewed runtime distribution.",
+      "output": "[Markdown Cell View]"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [328]: Target Y",
+      "source": "Y = np.log(np.mean(runs, axis=1))\nprint(Y[:5])",
+      "intuition": "Calculates mean execution time across all 4 runs and applies natural logarithm.",
+      "output": "[4.75677477 4.36570669 4.38906431 3.59389211 4.10823412]"
+    },
+    {
+      "cell_type": "markdown",
+      "title": "Markdown [4]: Loss & Gradients",
+      "source": "Defining core mathematical functions: MSE Loss, Gradient wrt Weights, and Gradient wrt Bias.",
+      "intuition": "Establishes gradient formulas derived from first principles.",
+      "output": "[Markdown Cell View]"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [329]: Loss & Gradients Implementation",
+      "source": "def MSE(X,Y,W,bias):\n    n = len(Y)\n    y_pred = X.dot(W) + bias\n    return (1/(2*n)) * (np.sum((y_pred - Y)**2))\n\ndef gradw(x,y,W,bias):\n    n = len(y)\n    y_pred = x.dot(W) + bias\n    return (1/n) * ((x.T).dot(y_pred - y))\n\ndef gradb(x,y,W,bias):\n    n = len(y)\n    y_pred = x.dot(W) + bias\n    return (1/n) * np.sum(y_pred - y)",
+      "intuition": "Vectorized NumPy implementations for Mean Squared Error and partial derivatives.",
+      "output": "[MSE, gradw, and gradb compiled successfully]"
+    },
+    {
+      "cell_type": "markdown",
+      "title": "Markdown [5]: Strategy 1 (RWR)",
+      "source": "Strategy 1: Random With Replacement sampling per epoch iteration.",
+      "intuition": "Draws uniform random indices with replacement.",
+      "output": "[Markdown Cell View]"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [330]: sgd_RWR",
+      "source": "def sgd_RWR(X,Y,alpha=0.01,epochs=100,batch_size=240, bias=0):\n    m, n = X.shape\n    w = np.zeros(n)\n    itt_per_epoch = int(np.ceil(m/batch_size))\n    loss_plot = []\n    for i in range(epochs):\n        for j in range(itt_per_epoch):\n            indexes = np.random.choice(m, size=batch_size, replace=True)\n            w -= alpha * gradw(X[indexes], Y[indexes], w, bias)\n            bias -= alpha * gradb(X[indexes], Y[indexes], w, bias)\n        loss_plot.append(MSE(X, Y, w, bias))\n    return w, bias, loss_plot",
+      "intuition": "Executes mini-batch updates with replacement.",
+      "output": "[sgd_RWR compiled successfully]"
+    },
+    {
+      "cell_type": "markdown",
+      "title": "Markdown [6]: Strategy 2 (RWOR)",
+      "source": "Strategy 2: Random Without Replacement via epoch permutation.",
+      "intuition": "Shuffles dataset indices each epoch and slices sequential batches.",
+      "output": "[Markdown Cell View]"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [331]: sgd_RWOR",
+      "source": "def sgd_RWOR(X,Y,alpha=0.01,epochs=100,batch_size=240,bias=0):\n    m, n = X.shape\n    w = np.zeros(n)\n    loss_plot = []\n    for i in range(epochs):\n        indexes = np.random.permutation(m)\n        X_p, Y_p = X[indexes], Y[indexes]\n        for j in range(0, m, batch_size):\n            w -= alpha * gradw(X_p[j:j+batch_size], Y_p[j:j+batch_size], w, bias)\n            bias -= alpha * gradb(X_p[j:j+batch_size], Y_p[j:j+batch_size], w, bias)\n        loss_plot.append(MSE(X, Y, w, bias))\n    return w, bias, loss_plot",
+      "intuition": "Executes mini-batch updates without replacement.",
+      "output": "[sgd_RWOR compiled successfully]"
+    },
+    {
+      "cell_type": "markdown",
+      "title": "Markdown [7]: Split & Standardize",
+      "source": "Train-test data splitting (80/20) and feature standardization (z-score normalization).",
+      "intuition": "Centers features around mean 0 with unit variance.",
+      "output": "[Markdown Cell View]"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [332]: Train Test Split",
+      "source": "from sklearn.model_selection import train_test_split\nX_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)\nmu, sigma = X_train.mean(axis=0), X_train.std(axis=0)\nX_train = (X_train - mu) / sigma\nX_test = (X_test - mu) / sigma",
+      "intuition": "Standardizes train and test splits.",
+      "output": "Data standardized successfully."
+    },
+    {
+      "cell_type": "code",
+      "title": "In [333]: Strategy 1 Training",
+      "source": "Epochs = 100\nAlpha = 0.00050\nbatch_sizes = [100, 200, 400, 800, 1600]\nfor bs in batch_sizes:\n    w_1, bias1, yy1 = sgd_RWR(X_train, Y_train, alpha=Alpha, epochs=Epochs, batch_size=bs)\ntest_mse_1 = MSE(X_test, Y_test, w_1, bias1)\nprint(f\"Final Test MSE Strategy 1: {test_mse_1:.4f}\")",
+      "intuition": "Trains Strategy 1 across multiple batch sizes.",
+      "output": "Final Test MSE using Weight Vector from Strategy 1: 0.2790"
+    },
+    {
+      "cell_type": "code",
+      "title": "In [334]: Strategy 2 Training",
+      "source": "for bs in batch_sizes:\n    w_2, bias2, yy2 = sgd_RWOR(X_train, Y_train, alpha=Alpha, epochs=Epochs, batch_size=bs)\ntest_mse_2 = MSE(X_test, Y_test, w_2, bias2)\nprint(f\"Final Test MSE Strategy 2: {test_mse_2:.4f}\")",
+      "intuition": "Trains Strategy 2 across multiple batch sizes.",
+      "output": "Final Test MSE using Weight Vector from Strategy 2: 0.2790"
     }
   ],
   "files": [
