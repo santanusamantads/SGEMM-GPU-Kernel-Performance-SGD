@@ -9,19 +9,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Floating Edit / CV-style Control Toolbar -->
+    <div class="edit-toolbar" id="editToolbar">
+        <button id="toggleEditBtn" class="btn primary">✎ Edit Mode: OFF</button>
+        <button id="downloadJsonBtn" class="btn secondary" style="display:none;">⬇ Download data.json</button>
+    </div>
+
     <header class="hero">
         <div class="container header-container">
             <div class="hero-titles">
                 <span class="badge">Machine Learning & GPU Optimization</span>
-                <h1>SGEMM GPU Kernel Performance</h1>
-                <p class="subtitle">Stochastic Gradient Descent (SGD) from Scratch (With vs. Without Replacement)</p>
+                <h1 contenteditable="false" data-field="project.title">SGEMM GPU Kernel Performance</h1>
+                <p class="subtitle" contenteditable="false" data-field="project.description">Stochastic Gradient Descent (SGD) from Scratch (With vs. Without Replacement)</p>
             </div>
             <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle theme">◐</button>
         </div>
         <div class="container hero-actions-container">
             <div class="hero-actions">
                 <a href="https://github.com/santanusamantads/SGEMM-GPU-Kernel-Performance-SGD" target="_blank" class="btn primary">View on GitHub</a>
-                <a href="#results" class="btn secondary">Explore Results</a>
+                <a href="#notebook-cells-section" class="btn secondary">Explore All Notebook Cells</a>
             </div>
         </div>
     </header>
@@ -34,48 +40,31 @@
             
             <div class="stats-grid">
                 <div class="stat-box">
-                    <h3 id="stat-instances">241,600</h3>
+                    <h3>241,600</h3>
                     <p>Dataset Instances[cite: 2]</p>
                 </div>
                 <div class="stat-box">
-                    <h3 id="stat-features">14</h3>
+                    <h3>14</h3>
                     <p>GPU Parameter Features[cite: 2]</p>
                 </div>
                 <div class="stat-box">
-                    <h3 id="stat-mse">~0.2790</h3>
+                    <h3>~0.2790</h3>
                     <p>Test MSE</p>
                 </div>
                 <div class="stat-box">
-                    <h3 id="stat-epochs">100</h3>
+                    <h3>100</h3>
                     <p>Training Epochs</p>
                 </div>
             </div>
         </section>
 
-        <!-- Optimization Strategies -->
-        <section id="strategies" class="card">
-            <h2>Optimization Strategies</h2>
-            <div class="strategies-grid">
-                <div class="strategy-card">
-                    <h3>Strategy 1</h3>
-                    <h4>Random With Replacement</h4>
-                    <p>Batches are sampled randomly with replacement during each epoch iteration.</p>
-                </div>
-                <div class="strategy-card">
-                    <h3>Strategy 2</h3>
-                    <h4>Random Without Replacement</h4>
-                    <p>Data indices are shuffled randomly at the start of each epoch and traversed sequentially without replacement.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- CODE & MATHEMATICAL INTUITION (VERTICAL STACK) -->
-        <section id="gfg-code-intuition" class="card">
+        <!-- ALL NOTEBOOK CELLS SECTION (CODE + MARKDOWN) -->
+        <section id="notebook-cells-section" class="card">
             <div class="gfg-header">
-                <h2>Mathematical Intuition & IPYNB Code Breakdown</h2>
-                <p class="gfg-subtitle">Core mathematical derivations paired with corresponding raw NumPy code blocks from <code>SGEMM_GPU_Kernel_SGD_Analysis.ipynb</code>.</p>
+                <h2>Complete Jupyter Notebook Cells & Mathematical Breakdown</h2>
+                <p class="gfg-subtitle">Every markdown and code cell from <code>SGEMM_GPU_Kernel_SGD_Analysis.ipynb</code> presented with mathematical intuition and source code.</p>
             </div>
-            <div id="gfgAccordionContainer" class="gfg-accordion-container">
+            <div id="cellsContainer" class="gfg-accordion-container">
                 <!-- Dynamically populated via script.js -->
             </div>
         </section>
