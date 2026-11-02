@@ -42,121 +42,138 @@
   "notebook_cells": [
     {
       "cell_type": "code",
-      "title": "In [325]: Imports & Setup",
+      "title": "Imports & Environment Initialization",
       "source": "import numpy as np\nimport pandas as pd\n\nnp.random.seed(42) # for future reproducibility",
-      "intuition": "Imports core numerical and data manipulation libraries, locking the random seed for reproducible stochastic initialization.",
+      "intuition": "Initializes the foundational numerical computing packages (`numpy` for vectorized tensor operations and `pandas` for tabular data structures). Locking the pseudorandom number generator seed (np.random.seed(42)) ensures that random sampling and weight initialization remain strictly deterministic and reproducible across training runs.",
+      "image_url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
       "output": "[Imports initialized successfully]"
     },
     {
       "cell_type": "markdown",
-      "title": "Markdown [1]: Dataset Info",
+      "title": "Dataset & Feature Overview",
       "source": "Info about features and dataset structure.",
-      "intuition": "Markdown documentation outlining feature descriptions and dataset properties.",
+      "intuition": "Documents the high-dimensional feature space of the SGEMM benchmark. Each instance represents a distinct GPU kernel configuration combining tiling parameters, work-group dimensions, and unrolling factors.",
+      "image_url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
       "output": "[Markdown Cell View]"
     },
     {
       "cell_type": "code",
-      "title": "In [326]: Load & Inspect Dataset",
+      "title": "Dataset Loading & Structural Inspection",
       "source": "df = pd.read_csv(\"sgemm_product.csv\")\nprint(f\"Dataset shape:{df.shape}\")\ndf.info()\nprint(df.describe())\nprint(df.head())",
-      "intuition": "Loads the 241,600-row SGEMM dataset via Pandas, verifying dimensions, data types, and summary statistics.",
-      "output": "Dataset shape:(241600, 18)\n<class 'pandas.DataFrame'>\nRangeIndex: 241600 entries, 0 to 241599\nData columns (total 18 columns):\n ..."
+      "intuition": "Loads the 241,600 rows into memory and performs exploratory data analysis (EDA). We inspect data types, memory footprint (33.2 MB), and descriptive statistics to check for scale disparities across the 14 integer tuning features and 4 float execution runs.",
+      "image_url": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=800&q=80",
+      "output": "Dataset shape:(241600, 18)\n<class 'pandas.DataFrame'>..."
     },
     {
       "cell_type": "markdown",
-      "title": "Markdown [2]: Feature Extraction",
+      "title": "Feature Extraction Phase",
       "source": "Separating features (first 14 columns) and target (last 4 execution runs).",
-      "intuition": "Isolates hardware tuning parameters from execution time benchmarks.",
+      "intuition": "Separates independent input variables (X) representing GPU kernel compile options from the dependent output benchmarks (Runs 1 to 4 in milliseconds).",
+      "image_url": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
       "output": "[Markdown Cell View]"
     },
     {
       "cell_type": "code",
-      "title": "In [327]: Extract Features",
+      "title": "Feature Matrix & Target Extraction",
       "source": "X = df.iloc[:,:14].values\nruns = df.iloc[:,14:18].values",
-      "intuition": "Extracts NumPy matrices for the 14 GPU tuning features (X) and the 4 benchmark runs.",
+      "intuition": "Slices the pandas DataFrame into pure NumPy ndarrays. X holds shape (241600, 14) and runs holds shape (241600, 4), preparing raw data for vectorized linear algebra computations.",
+      "image_url": "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80",
       "output": "[Features X and runs extracted successfully]"
     },
     {
       "cell_type": "markdown",
-      "title": "Markdown [3]: Target Transformation",
+      "title": "Target Transformation & Log-Averaging",
       "source": "Taking the log average of run columns to stabilize variance and simplify calculations.",
-      "intuition": "Logarithmic transformation compresses the skewed runtime distribution.",
+      "intuition": "GPU execution times span multiple orders of magnitude (from 13ms to 3300ms), causing severe heteroscedasticity. Taking the arithmetic mean across the 4 runs followed by the natural logarithm compresses the dynamic range into a stable normal-like distribution.",
+      "image_url": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80",
       "output": "[Markdown Cell View]"
     },
     {
       "cell_type": "code",
-      "title": "In [328]: Target Y",
+      "title": "Target Vector Construction",
       "source": "Y = np.log(np.mean(runs, axis=1))\nprint(Y[:5])",
-      "intuition": "Calculates mean execution time across all 4 runs and applies natural logarithm.",
+      "intuition": "Computes the target vector Y through equation: Y = ln((Run1 + Run2 + Run3 + Run4) / 4). This logarithmic compression stabilizes gradient updates and prevents extreme execution outliers from destabilizing the cost function.",
+      "image_url": "https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=800&q=80",
       "output": "[4.75677477 4.36570669 4.38906431 3.59389211 4.10823412]"
     },
     {
       "cell_type": "markdown",
-      "title": "Markdown [4]: Loss & Gradients",
+      "title": "Mathematical Formulation of Loss & Gradients",
       "source": "Defining core mathematical functions: MSE Loss, Gradient wrt Weights, and Gradient wrt Bias.",
-      "intuition": "Establishes gradient formulas derived from first principles.",
+      "intuition": "Establishes the convex optimization foundation. Linear regression predicts execution time via dot product: y_pred = X dot W + b. The Mean Squared Error (MSE) measures aggregate squared residuals.",
+      "image_url": "https://images.unsplash.com/photo-1596495577886-d920f1fb7238?auto=format&fit=crop&w=800&q=80",
       "output": "[Markdown Cell View]"
     },
     {
       "cell_type": "code",
-      "title": "In [329]: Loss & Gradients Implementation",
+      "title": "Loss Function & Partial Derivative Implementation",
       "source": "def MSE(X,Y,W,bias):\n    n = len(Y)\n    y_pred = X.dot(W) + bias\n    return (1/(2*n)) * (np.sum((y_pred - Y)**2))\n\ndef gradw(x,y,W,bias):\n    n = len(y)\n    y_pred = x.dot(W) + bias\n    return (1/n) * ((x.T).dot(y_pred - y))\n\ndef gradb(x,y,W,bias):\n    n = len(y)\n    y_pred = x.dot(W) + bias\n    return (1/n) * np.sum(y_pred - y)",
-      "intuition": "Vectorized NumPy implementations for Mean Squared Error and partial derivatives.",
+      "intuition": "Implements exact calculus formulas. Loss function: L = (1 / 2n) * sum((X dot W + b - Y)^2). Weight gradient: dL/dW = (1/n) * X^T * (y_pred - Y). Bias gradient: dL/db = (1/n) * sum(y_pred - Y). Division by 2 simplifies the power rule derivative nicely.",
+      "image_url": "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80",
       "output": "[MSE, gradw, and gradb compiled successfully]"
     },
     {
       "cell_type": "markdown",
-      "title": "Markdown [5]: Strategy 1 (RWR)",
+      "title": "Strategy 1: Random With Replacement (RWR)",
       "source": "Strategy 1: Random With Replacement sampling per epoch iteration.",
-      "intuition": "Draws uniform random indices with replacement.",
+      "intuition": "In RWR, mini-batches are drawn uniformly at random with replacement. This models independent Poisson sampling where identical rows can be sampled multiple times within the same epoch update cycle.",
+      "image_url": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
       "output": "[Markdown Cell View]"
     },
     {
       "cell_type": "code",
-      "title": "In [330]: sgd_RWR",
+      "title": "Stochastic Gradient Descent With Replacement",
       "source": "def sgd_RWR(X,Y,alpha=0.01,epochs=100,batch_size=240, bias=0):\n    m, n = X.shape\n    w = np.zeros(n)\n    itt_per_epoch = int(np.ceil(m/batch_size))\n    loss_plot = []\n    for i in range(epochs):\n        for j in range(itt_per_epoch):\n            indexes = np.random.choice(m, size=batch_size, replace=True)\n            w -= alpha * gradw(X[indexes], Y[indexes], w, bias)\n            bias -= alpha * gradb(X[indexes], Y[indexes], w, bias)\n        loss_plot.append(MSE(X, Y, w, bias))\n    return w, bias, loss_plot",
-      "intuition": "Executes mini-batch updates with replacement.",
+      "intuition": "Performs stochastic updates: W_new = W_old - alpha * dL/dW using randomly bootstrapped batch indices generated via `np.random.choice(m, size=batch_size, replace=True)`.",
+      "image_url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
       "output": "[sgd_RWR compiled successfully]"
     },
     {
       "cell_type": "markdown",
-      "title": "Markdown [6]: Strategy 2 (RWOR)",
+      "title": "Strategy 2: Random Without Replacement (RWOR)",
       "source": "Strategy 2: Random Without Replacement via epoch permutation.",
-      "intuition": "Shuffles dataset indices each epoch and slices sequential batches.",
+      "intuition": "RWOR shuffles dataset row indices at the start of every epoch and slices sequential non-overlapping chunks. This guarantees every single instance is visited exactly once per epoch, reducing estimator variance.",
+      "image_url": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
       "output": "[Markdown Cell View]"
     },
     {
       "cell_type": "code",
-      "title": "In [331]: sgd_RWOR",
+      "title": "Stochastic Gradient Descent Without Replacement",
       "source": "def sgd_RWOR(X,Y,alpha=0.01,epochs=100,batch_size=240,bias=0):\n    m, n = X.shape\n    w = np.zeros(n)\n    loss_plot = []\n    for i in range(epochs):\n        indexes = np.random.permutation(m)\n        X_p, Y_p = X[indexes], Y[indexes]\n        for j in range(0, m, batch_size):\n            w -= alpha * gradw(X_p[j:j+batch_size], Y_p[j:j+batch_size], w, bias)\n            bias -= alpha * gradb(X_p[j:j+batch_size], Y_p[j:j+batch_size], w, bias)\n        loss_plot.append(MSE(X, Y, w, bias))\n    return w, bias, loss_plot",
-      "intuition": "Executes mini-batch updates without replacement.",
+      "intuition": "Utilizes `np.random.permutation(m)` to permute indices once per epoch. Batches of size `batch_size` traverse through the permuted dataset sequentially without duplication.",
+      "image_url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
       "output": "[sgd_RWOR compiled successfully]"
     },
     {
       "cell_type": "markdown",
-      "title": "Markdown [7]: Split & Standardize",
+      "title": "Data Splitting & Z-Score Standardization",
       "source": "Train-test data splitting (80/20) and feature standardization (z-score normalization).",
-      "intuition": "Centers features around mean 0 with unit variance.",
+      "intuition": "Performs an 80-20 train-test split and applies Z-score normalization: X_scaled = (X - mu) / sigma. Feature scaling is mathematically vital so that gradient descent converges uniformly across features with vastly different physical units.",
+      "image_url": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=800&q=80",
       "output": "[Markdown Cell View]"
     },
     {
       "cell_type": "code",
-      "title": "In [332]: Train Test Split",
+      "title": "Train-Test Split & Standardization Pipeline",
       "source": "from sklearn.model_selection import train_test_split\nX_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)\nmu, sigma = X_train.mean(axis=0), X_train.std(axis=0)\nX_train = (X_train - mu) / sigma\nX_test = (X_test - mu) / sigma",
-      "intuition": "Standardizes train and test splits.",
+      "intuition": "Computes mean (mu) and standard deviation (sigma) exclusively on the training partition to prevent data leakage, subsequently standardizing both train and test matrices.",
+      "image_url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
       "output": "Data standardized successfully."
     },
     {
       "cell_type": "code",
-      "title": "In [333]: Strategy 1 Training",
+      "title": "Strategy 1 Training & Evaluation",
       "source": "Epochs = 100\nAlpha = 0.00050\nbatch_sizes = [100, 200, 400, 800, 1600]\nfor bs in batch_sizes:\n    w_1, bias1, yy1 = sgd_RWR(X_train, Y_train, alpha=Alpha, epochs=Epochs, batch_size=bs)\ntest_mse_1 = MSE(X_test, Y_test, w_1, bias1)\nprint(f\"Final Test MSE Strategy 1: {test_mse_1:.4f}\")",
-      "intuition": "Trains Strategy 1 across multiple batch sizes.",
+      "intuition": "Trains the model using Strategy 1 across multiple batch sizes over 100 epochs, evaluating generalization performance on unseen test data.",
+      "image_url": "https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=800&q=80",
       "output": "Final Test MSE using Weight Vector from Strategy 1: 0.2790"
     },
     {
       "cell_type": "code",
-      "title": "In [334]: Strategy 2 Training",
+      "title": "Strategy 2 Training & Evaluation",
       "source": "for bs in batch_sizes:\n    w_2, bias2, yy2 = sgd_RWOR(X_train, Y_train, alpha=Alpha, epochs=Epochs, batch_size=bs)\ntest_mse_2 = MSE(X_test, Y_test, w_2, bias2)\nprint(f\"Final Test MSE Strategy 2: {test_mse_2:.4f}\")",
-      "intuition": "Trains Strategy 2 across multiple batch sizes.",
+      "intuition": "Trains the model using Strategy 2 across identical batch sizes, confirming robust convergence with a final test MSE of 0.2790.",
+      "image_url": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80",
       "output": "Final Test MSE using Weight Vector from Strategy 2: 0.2790"
     }
   ],

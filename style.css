@@ -476,6 +476,15 @@ body {
     line-height: 1.5;
 }
 
+.cell-illustration {
+    width: 100%;
+    max-height: 250px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    opacity: 0.9;
+}
+
 .output-block pre {
     background: #07090f;
     border-left: 3px solid #2ea043;

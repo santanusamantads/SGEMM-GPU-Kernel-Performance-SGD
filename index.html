@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- myCV-Style Navbar / Header Edit Toggle -->
+    <!-- myCV Navbar -->
     <nav class="cv-nav">
         <div class="container nav-container">
             <span class="nav-brand">Santanu.</span>
@@ -24,7 +24,7 @@
         </div>
     </nav>
 
-    <!-- myCV-Style Slide-out Editor Drawer -->
+    <!-- myCV Slide-out Editor Drawer -->
     <div class="cv-drawer" id="cvDrawer">
         <div class="drawer-header">
             <h3>Edit CV & Project Data</h3>
@@ -32,9 +32,7 @@
         </div>
         <div class="drawer-body">
             <p class="drawer-hint">Changes auto-save in your browser. Download <code>data.json</code> and commit to your repo to publish.</p>
-            <div id="drawerFormContent">
-                <!-- Dynamically populated edit controls -->
-            </div>
+            <div id="drawerFormContent"></div>
             <div class="drawer-footer-actions">
                 <button id="downloadJsonBtn" class="btn primary">⬇ Download data.json</button>
                 <button id="resetDataBtn" class="btn secondary">Reset</button>
@@ -89,11 +87,9 @@
         <section id="notebook-cells-section" class="card">
             <div class="gfg-header">
                 <h2>Complete Jupyter Notebook Cells & Mathematical Breakdown</h2>
-                <p class="gfg-subtitle">Every markdown and code cell from <code>SGEMM_GPU_Kernel_SGD_Analysis.ipynb</code> presented with mathematical intuition and source code.</p>
+                <p class="gfg-subtitle">Every markdown and code cell from <code>SGEMM_GPU_Kernel_SGD_Analysis.ipynb</code> presented with mathematical intuition, equations, and relevant illustrations.</p>
             </div>
-            <div id="cellsContainer" class="gfg-accordion-container">
-                <!-- Dynamically populated via script.js -->
-            </div>
+            <div id="cellsContainer" class="gfg-accordion-container"></div>
         </section>
 
         <!-- Interactive .ipynb Notebook Workspace -->

@@ -25,7 +25,6 @@ async function loadProjectData() {
         const response = await fetch('data.json');
         globalProjectData = await response.json();
         
-        // Load saved local edits if any
         const saved = localStorage.getItem("sgemm_project_data");
         if (saved) {
             globalProjectData = JSON.parse(saved);
@@ -74,6 +73,10 @@ function populateNotebookCells(cells) {
                     <h4>Mathematical & Conceptual Intuition</h4>
                     <p>${cell.intuition || ''}</p>
                 </div>
+                ${cell.image_url ? `
+                <div class="gfg-block image-block">
+                    <img src="${cell.image_url}" alt="${cell.title} illustration" class="cell-illustration" loading="lazy" />
+                </div>` : ''}
                 <div class="gfg-block code-block-wrapper">
                     <h4>${isCode ? 'Python Code (.ipynb)' : 'Markdown Source Content'}</h4>
                     <pre><code>${escapeHtml(cell.source)}</code></pre>
@@ -136,7 +139,6 @@ function buildDrawerForm(data) {
     if (!formContainer) return;
     formContainer.innerHTML = "";
 
-    // Project Details Group
     const projGroup = document.createElement("div");
     projGroup.className = "drawer-section-group";
     projGroup.innerHTML = `
@@ -148,7 +150,6 @@ function buildDrawerForm(data) {
     `;
     formContainer.appendChild(projGroup);
 
-    // Notebook Cells Group
     const cellsGroup = document.createElement("div");
     cellsGroup.className = "drawer-section-group";
     cellsGroup.innerHTML = `<h4>Notebook Cells Intuition & Source</h4>`;
@@ -161,13 +162,12 @@ function buildDrawerForm(data) {
             <label>Intuition</label>
             <textarea data-cell-idx="${idx}" data-field="intuition">${cell.intuition || ''}</textarea>
             <label>Source Code / Text</label>
-            <textarea data-cell-idx="${idx}" data-field="source" rows="4">${cell.source}</textarea>
+            <textarea data-cell-idx="${idx}" data-field="source" rows="3">${cell.source}</textarea>
         `;
         cellsGroup.appendChild(cellBox);
     });
     formContainer.appendChild(cellsGroup);
 
-    // Live binding for auto-save
     formContainer.addEventListener("input", (e) => {
         const target = e.target;
         if (target.id === "editProjTitle") {
