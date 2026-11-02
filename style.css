@@ -42,19 +42,183 @@ body {
     padding: 0 20px;
 }
 
-/* Edit Mode Toolbar */
-.edit-toolbar {
+/* myCV Navbar */
+.cv-nav {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--text-heading);
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.nav-links a {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--accent-color);
+}
+
+.edit-nav-btn {
+    background: rgba(88, 166, 255, 0.1);
+    color: var(--accent-color) !important;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(88, 166, 255, 0.2);
+}
+
+/* myCV Slide-out Drawer */
+.cv-drawer {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
+    top: 0;
+    right: -450px;
+    width: 420px;
+    height: 100%;
+    background: var(--card-bg);
+    border-left: 1px solid var(--border-color);
+    z-index: 2000;
+    box-shadow: -5px 0 25px rgba(0,0,0,0.5);
+    transition: right 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.cv-drawer.open {
+    right: 0;
+}
+
+.drawer-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 1999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.drawer-backdrop.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.drawer-header h3 {
+    color: var(--text-heading);
+    font-size: 1.1rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.drawer-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.drawer-hint {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin-bottom: 10px;
+}
+
+.drawer-section-group {
+    background: var(--code-bg);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.drawer-section-group h4 {
+    color: var(--accent-color);
+    font-size: 0.95rem;
+}
+
+.drawer-subbox {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.drawer-subbox strong {
+    font-size: 0.85rem;
+    color: var(--text-heading);
+    font-family: 'Fira Code', monospace;
+}
+
+.drawer-section-group label, .drawer-subbox label {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    text-transform: uppercase;
+}
+
+.drawer-section-group input, .drawer-section-group textarea, .drawer-subbox textarea {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    width: 100%;
+}
+
+.drawer-footer-actions {
     display: flex;
     gap: 10px;
-    background: var(--card-bg);
-    padding: 10px 15px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    margin-top: 10px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
 }
 
 /* Hero Section */
@@ -78,16 +242,15 @@ body {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .theme-toggle-btn:hover {
@@ -332,7 +495,7 @@ body {
     color: var(--text-primary);
 }
 
-/* Google Colab Workspace Card Styles */
+/* Workspace Card Styles */
 .workspace-header {
     display: flex;
     justify-content: space-between;
@@ -340,12 +503,6 @@ body {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
     margin-bottom: 15px;
-}
-
-.workspace-header h2 {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
 }
 
 .workspace-badge {
@@ -384,13 +541,6 @@ body {
     margin-bottom: 8px;
 }
 
-.colab-info p {
-    color: var(--text-primary);
-    opacity: 0.85;
-    font-size: 0.95rem;
-    line-height: 1.5;
-}
-
 .colab-actions {
     display: flex;
     align-items: center;
@@ -417,12 +567,6 @@ body {
     height: 20px;
 }
 
-.colab-launch-btn:hover {
-    border-color: var(--accent-color);
-    background: var(--border-color);
-}
-
-/* Batch Selector */
 .batch-selector {
     display: flex;
     flex-wrap: wrap;
@@ -457,7 +601,6 @@ body {
     font-size: 0.9rem;
 }
 
-/* Tables */
 .table-wrapper {
     overflow-x: auto;
     margin-top: 15px;
@@ -480,23 +623,6 @@ th {
     font-weight: 600;
 }
 
-td {
-    font-size: 0.95rem;
-}
-
-/* References */
-ul {
-    padding-left: 20px;
-    margin-top: 10px;
-}
-
-li {
-    margin-bottom: 8px;
-    font-size: 0.95rem;
-    opacity: 0.8;
-}
-
-/* Footer */
 footer {
     text-align: center;
     padding: 30px 0;

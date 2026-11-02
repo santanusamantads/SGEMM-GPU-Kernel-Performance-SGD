@@ -1,17 +1,14 @@
 let globalProjectData = null;
-let isEditMode = false;
 
 document.addEventListener("DOMContentLoaded", () => {
     initThemeToggle();
     loadProjectData();
-    initEditMode();
+    initCvDrawer();
 });
 
-// Theme Switcher Logic
 function initThemeToggle() {
     const themeToggleBtn = document.getElementById("themeToggle");
     const htmlElement = document.documentElement;
-    
     const savedTheme = localStorage.getItem("theme") || "dark";
     htmlElement.setAttribute("data-theme", savedTheme);
 
@@ -28,11 +25,32 @@ async function loadProjectData() {
         const response = await fetch('data.json');
         globalProjectData = await response.json();
         
-        populateBatchSelector(globalProjectData.hyperparameters.batch_sizes);
-        populateFileTable(globalProjectData.files);
-        populateNotebookCells(globalProjectData.notebook_cells);
+        // Load saved local edits if any
+        const saved = localStorage.getItem("sgemm_project_data");
+        if (saved) {
+            globalProjectData = JSON.parse(saved);
+        }
+
+        renderPageContent(globalProjectData);
+        buildDrawerForm(globalProjectData);
     } catch (error) {
-        console.error("Error loading data.json, using fallback configuration.", error);
+        console.error("Error loading data.json", error);
+    }
+}
+
+function renderPageContent(data) {
+    if (data.project) {
+        document.getElementById("heroTitle").textContent = data.project.title;
+        document.getElementById("heroSubtitle").textContent = data.project.description;
+    }
+    if (data.hyperparameters && data.hyperparameters.batch_sizes) {
+        populateBatchSelector(data.hyperparameters.batch_sizes);
+    }
+    if (data.files) {
+        populateFileTable(data.files);
+    }
+    if (data.notebook_cells) {
+        populateNotebookCells(data.notebook_cells);
     }
 }
 
@@ -44,7 +62,6 @@ function populateNotebookCells(cells) {
     cells.forEach((cell, idx) => {
         const item = document.createElement("div");
         item.className = "gfg-item";
-        
         const isCode = cell.cell_type === "code";
         
         item.innerHTML = `
@@ -55,11 +72,11 @@ function populateNotebookCells(cells) {
             <div class="gfg-item-body">
                 <div class="gfg-block">
                     <h4>Mathematical & Conceptual Intuition</h4>
-                    <p contenteditable="${isEditMode}" class="editable-field" data-index="${idx}" data-field="intuition">${cell.intuition || 'Cell execution explanation and underlying mechanics.'}</p>
+                    <p>${cell.intuition || ''}</p>
                 </div>
                 <div class="gfg-block code-block-wrapper">
                     <h4>${isCode ? 'Python Code (.ipynb)' : 'Markdown Source Content'}</h4>
-                    <pre><code contenteditable="${isEditMode}" class="editable-field" data-index="${idx}" data-field="source">${escapeHtml(cell.source)}</code></pre>
+                    <pre><code>${escapeHtml(cell.source)}</code></pre>
                 </div>
                 ${cell.output ? `
                 <div class="gfg-block output-block">
@@ -73,35 +90,32 @@ function populateNotebookCells(cells) {
 }
 
 function escapeHtml(text) {
-    return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function initEditMode() {
-    const toggleBtn = document.getElementById("toggleEditBtn");
+function initCvDrawer() {
+    const openBtn = document.getElementById("openEditorBtn");
+    const closeBtn = document.getElementById("closeDrawerBtn");
+    const drawer = document.getElementById("cvDrawer");
+    const backdrop = document.getElementById("drawerBackdrop");
     const downloadBtn = document.getElementById("downloadJsonBtn");
+    const resetBtn = document.getElementById("resetDataBtn");
 
-    toggleBtn.addEventListener("click", () => {
-        isEditMode = !isEditMode;
-        if (isEditMode) {
-            toggleBtn.textContent = "💾 Edit Mode: ON (Click to Save/Disable)";
-            toggleBtn.style.background = "#2ea043";
-            downloadBtn.style.display = "inline-block";
-            enableEditing(true);
-        } else {
-            toggleBtn.textContent = "✎ Edit Mode: OFF";
-            toggleBtn.style.background = "";
-            enableEditing(false);
-            collectEdits();
-        }
+    openBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        drawer.classList.add("open");
+        backdrop.classList.add("open");
     });
 
+    const closeDrawer = () => {
+        drawer.classList.remove("open");
+        backdrop.classList.remove("open");
+    };
+
+    closeBtn.addEventListener("click", closeDrawer);
+    backdrop.addEventListener("click", closeDrawer);
+
     downloadBtn.addEventListener("click", () => {
-        collectEdits();
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(globalProjectData, null, 2));
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
@@ -110,29 +124,63 @@ function initEditMode() {
         downloadAnchor.click();
         downloadAnchor.remove();
     });
-}
 
-function enableEditing(enable) {
-    document.querySelectorAll('.editable-field').forEach(el => {
-        el.setAttribute('contenteditable', enable);
-        if (enable) {
-            el.style.border = '1px dashed var(--accent-color)';
-            el.style.padding = '4px';
-        } else {
-            el.style.border = 'none';
-            el.style.padding = '0';
-        }
+    resetBtn.addEventListener("click", () => {
+        localStorage.removeItem("sgemm_project_data");
+        location.reload();
     });
 }
 
-function collectEdits() {
-    if (!globalProjectData || !globalProjectData.notebook_cells) return;
-    document.querySelectorAll('.editable-field').forEach(el => {
-        const idx = el.getAttribute('data-index');
-        const field = el.getAttribute('data-field');
-        if (idx !== null && field !== null) {
-            globalProjectData.notebook_cells[idx][field] = el.innerText;
+function buildDrawerForm(data) {
+    const formContainer = document.getElementById("drawerFormContent");
+    if (!formContainer) return;
+    formContainer.innerHTML = "";
+
+    // Project Details Group
+    const projGroup = document.createElement("div");
+    projGroup.className = "drawer-section-group";
+    projGroup.innerHTML = `
+        <h4>Project Settings</h4>
+        <label>Title</label>
+        <input type="text" id="editProjTitle" value="${data.project.title}" />
+        <label>Description</label>
+        <textarea id="editProjDesc">${data.project.description}</textarea>
+    `;
+    formContainer.appendChild(projGroup);
+
+    // Notebook Cells Group
+    const cellsGroup = document.createElement("div");
+    cellsGroup.className = "drawer-section-group";
+    cellsGroup.innerHTML = `<h4>Notebook Cells Intuition & Source</h4>`;
+    
+    data.notebook_cells.forEach((cell, idx) => {
+        const cellBox = document.createElement("div");
+        cellBox.className = "drawer-subbox";
+        cellBox.innerHTML = `
+            <strong>${cell.title}</strong>
+            <label>Intuition</label>
+            <textarea data-cell-idx="${idx}" data-field="intuition">${cell.intuition || ''}</textarea>
+            <label>Source Code / Text</label>
+            <textarea data-cell-idx="${idx}" data-field="source" rows="4">${cell.source}</textarea>
+        `;
+        cellsGroup.appendChild(cellBox);
+    });
+    formContainer.appendChild(cellsGroup);
+
+    // Live binding for auto-save
+    formContainer.addEventListener("input", (e) => {
+        const target = e.target;
+        if (target.id === "editProjTitle") {
+            globalProjectData.project.title = target.value;
+        } else if (target.id === "editProjDesc") {
+            globalProjectData.project.description = target.value;
+        } else if (target.dataset.cellIdx !== undefined) {
+            const idx = target.dataset.cellIdx;
+            const field = target.dataset.field;
+            globalProjectData.notebook_cells[idx][field] = target.value;
         }
+        localStorage.setItem("sgemm_project_data", JSON.stringify(globalProjectData));
+        renderPageContent(globalProjectData);
     });
 }
 

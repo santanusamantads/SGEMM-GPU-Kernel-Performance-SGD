@@ -9,20 +9,47 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Floating Edit / CV-style Control Toolbar -->
-    <div class="edit-toolbar" id="editToolbar">
-        <button id="toggleEditBtn" class="btn primary">✎ Edit Mode: OFF</button>
-        <button id="downloadJsonBtn" class="btn secondary" style="display:none;">⬇ Download data.json</button>
+    <!-- myCV-Style Navbar / Header Edit Toggle -->
+    <nav class="cv-nav">
+        <div class="container nav-container">
+            <span class="nav-brand">Santanu.</span>
+            <div class="nav-links">
+                <a href="#overview">About</a>
+                <a href="#notebook-cells-section">Cells</a>
+                <a href="#experiments">Experiments</a>
+                <a href="#files">Files</a>
+                <a href="#" id="openEditorBtn" class="edit-nav-btn">✎ Edit</a>
+            </div>
+            <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle theme">◐</button>
+        </div>
+    </nav>
+
+    <!-- myCV-Style Slide-out Editor Drawer -->
+    <div class="cv-drawer" id="cvDrawer">
+        <div class="drawer-header">
+            <h3>Edit CV & Project Data</h3>
+            <button id="closeDrawerBtn" class="close-btn">✕</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-hint">Changes auto-save in your browser. Download <code>data.json</code> and commit to your repo to publish.</p>
+            <div id="drawerFormContent">
+                <!-- Dynamically populated edit controls -->
+            </div>
+            <div class="drawer-footer-actions">
+                <button id="downloadJsonBtn" class="btn primary">⬇ Download data.json</button>
+                <button id="resetDataBtn" class="btn secondary">Reset</button>
+            </div>
+        </div>
     </div>
+    <div class="drawer-backdrop" id="drawerBackdrop"></div>
 
     <header class="hero">
         <div class="container header-container">
             <div class="hero-titles">
                 <span class="badge">Machine Learning & GPU Optimization</span>
-                <h1 contenteditable="false" data-field="project.title">SGEMM GPU Kernel Performance</h1>
-                <p class="subtitle" contenteditable="false" data-field="project.description">Stochastic Gradient Descent (SGD) from Scratch (With vs. Without Replacement)</p>
+                <h1 id="heroTitle">SGEMM GPU Kernel Performance</h1>
+                <p class="subtitle" id="heroSubtitle">Stochastic Gradient Descent (SGD) from Scratch (With vs. Without Replacement)</p>
             </div>
-            <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle theme">◐</button>
         </div>
         <div class="container hero-actions-container">
             <div class="hero-actions">
@@ -36,16 +63,16 @@
         <!-- Overview Section -->
         <section id="overview" class="card">
             <h2>Project Overview</h2>
-            <p>This project implements Stochastic Gradient Descent (SGD) completely from scratch in NumPy to model and predict GPU kernel execution performance using the high-dimensional SGEMM dataset[cite: 1].</p>
+            <p>This project implements Stochastic Gradient Descent (SGD) completely from scratch in NumPy to model and predict GPU kernel execution performance using the high-dimensional SGEMM dataset.</p>
             
             <div class="stats-grid">
                 <div class="stat-box">
                     <h3>241,600</h3>
-                    <p>Dataset Instances[cite: 2]</p>
+                    <p>Dataset Instances</p>
                 </div>
                 <div class="stat-box">
                     <h3>14</h3>
-                    <p>GPU Parameter Features[cite: 2]</p>
+                    <p>GPU Parameter Features</p>
                 </div>
                 <div class="stat-box">
                     <h3>~0.2790</h3>
@@ -58,7 +85,7 @@
             </div>
         </section>
 
-        <!-- ALL NOTEBOOK CELLS SECTION (CODE + MARKDOWN) -->
+        <!-- ALL NOTEBOOK CELLS SECTION -->
         <section id="notebook-cells-section" class="card">
             <div class="gfg-header">
                 <h2>Complete Jupyter Notebook Cells & Mathematical Breakdown</h2>
@@ -69,7 +96,7 @@
             </div>
         </section>
 
-        <!-- Interactive .ipynb Notebook Workspace (Google Colab Style) -->
+        <!-- Interactive .ipynb Notebook Workspace -->
         <section id="ipynb-workspace" class="card">
             <div class="workspace-header">
                 <h2>Interactive .ipynb Notebook Workspace</h2>
@@ -84,7 +111,6 @@
                         <p>Explore the complete stochastic gradient descent pipeline, custom NumPy implementations, training visualizations, and SGEMM GPU benchmark comparisons directly in a hosted Jupyter runtime.</p>
                     </div>
                     <div class="colab-actions">
-                        <!-- Official Open in Colab Badge -->
                         <a href="https://colab.research.google.com/github/santanusamantads/SGEMM-GPU-Kernel-Performance-SGD/blob/main/SGEMM_GPU_Kernel_SGD_Analysis.ipynb" target="_blank" class="colab-launch-btn">
                             <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
                             <span>Open in Google Colab</span>
@@ -99,9 +125,7 @@
         <section id="experiments" class="card">
             <h2>Experiment Configuration & Batch Testing</h2>
             <p>Select a batch size configuration evaluated in the analysis pipeline:</p>
-            <div class="batch-selector" id="batchButtons">
-                <!-- Dynamically populated via JS -->
-            </div>
+            <div class="batch-selector" id="batchButtons"></div>
             <div class="config-display" id="configDisplay">
                 <p><strong>Learning Rate (&alpha;):</strong> 0.0005</p>
                 <p><strong>Epochs:</strong> 100</p>
@@ -121,9 +145,7 @@
                             <th>Description</th>
                         </tr>
                     </thead>
-                    <tbody id="fileTableBody">
-                        <!-- Dynamically populated via JS -->
-                    </tbody>
+                    <tbody id="fileTableBody"></tbody>
                 </table>
             </div>
         </section>
@@ -132,8 +154,8 @@
         <section id="references" class="card">
             <h2>Dataset Attribution & References</h2>
             <ul>
-                <li>Rafael Ballester-Ripoll, Enrique G. Paredes, and Renato Pajarola. <em>"Sobol Tensor Trains for Global Sensitivity Analysis"</em>[cite: 2]. arXiv preprint arXiv:1712.00233, 2017[cite: 2].</li>
-                <li>Cedric Nugteren and Valeriu Codreanu. <em>"CLTune: A Generic Auto-Tuner for OpenCL Kernels"</em>[cite: 2]. 9th International Symposium on Embedded Multicore/Many-core Systems-on-Chip (MCSoC). IEEE, 2015[cite: 2].</li>
+                <li>Rafael Ballester-Ripoll, Enrique G. Paredes, and Renato Pajarola. <em>"Sobol Tensor Trains for Global Sensitivity Analysis"</em>. arXiv preprint arXiv:1712.00233, 2017.</li>
+                <li>Cedric Nugteren and Valeriu Codreanu. <em>"CLTune: A Generic Auto-Tuner for OpenCL Kernels"</em>. 9th International Symposium on Embedded Multicore/Many-core Systems-on-Chip (MCSoC). IEEE, 2015.</li>
             </ul>
         </section>
     </main>
