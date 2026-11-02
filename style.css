@@ -90,7 +90,7 @@ body {
     border: 1px solid rgba(88, 166, 255, 0.2);
 }
 
-/* myCV Slide-out Drawer */
+/* Slide-out Drawer */
 .cv-drawer {
     position: fixed;
     top: 0;
@@ -202,7 +202,7 @@ body {
     text-transform: uppercase;
 }
 
-.drawer-section-group input, .drawer-section-group textarea, .drawer-subbox textarea {
+.drawer-section-group input, .drawer-section-group textarea, .drawer-subbox textarea, .drawer-subbox input[type="text"] {
     background: var(--bg-color);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
@@ -211,6 +211,22 @@ body {
     font-family: inherit;
     font-size: 0.85rem;
     width: 100%;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.checkbox-wrapper label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: none !important;
+    font-size: 0.8rem !important;
+    cursor: pointer;
 }
 
 .drawer-footer-actions {
@@ -482,7 +498,6 @@ body {
     object-fit: cover;
     border-radius: 6px;
     border: 1px solid var(--border-color);
-    opacity: 0.9;
 }
 
 .output-block pre {

@@ -62,6 +62,7 @@ function populateNotebookCells(cells) {
         const item = document.createElement("div");
         item.className = "gfg-item";
         const isCode = cell.cell_type === "code";
+        const showImage = cell.image_url && !cell.hide_image;
         
         item.innerHTML = `
             <div class="gfg-item-header">
@@ -73,7 +74,7 @@ function populateNotebookCells(cells) {
                     <h4>Mathematical & Conceptual Intuition</h4>
                     <p>${cell.intuition || ''}</p>
                 </div>
-                ${cell.image_url ? `
+                ${showImage ? `
                 <div class="gfg-block image-block">
                     <img src="${cell.image_url}" alt="${cell.title} illustration" class="cell-illustration" loading="lazy" />
                 </div>` : ''}
@@ -152,7 +153,7 @@ function buildDrawerForm(data) {
 
     const cellsGroup = document.createElement("div");
     cellsGroup.className = "drawer-section-group";
-    cellsGroup.innerHTML = `<h4>Notebook Cells Intuition & Source</h4>`;
+    cellsGroup.innerHTML = `<h4>Notebook Cells (Intuition, Code, & Images)</h4>`;
     
     data.notebook_cells.forEach((cell, idx) => {
         const cellBox = document.createElement("div");
@@ -163,6 +164,11 @@ function buildDrawerForm(data) {
             <textarea data-cell-idx="${idx}" data-field="intuition">${cell.intuition || ''}</textarea>
             <label>Source Code / Text</label>
             <textarea data-cell-idx="${idx}" data-field="source" rows="3">${cell.source}</textarea>
+            <label>Image URL</label>
+            <input type="text" data-cell-idx="${idx}" data-field="image_url" value="${cell.image_url || ''}" placeholder="https://..." />
+            <div class="checkbox-wrapper">
+                <label><input type="checkbox" data-cell-idx="${idx}" data-field="hide_image" ${cell.hide_image ? 'checked' : ''} /> Hide Picture for this section</label>
+            </div>
         `;
         cellsGroup.appendChild(cellBox);
     });
@@ -177,10 +183,25 @@ function buildDrawerForm(data) {
         } else if (target.dataset.cellIdx !== undefined) {
             const idx = target.dataset.cellIdx;
             const field = target.dataset.field;
-            globalProjectData.notebook_cells[idx][field] = target.value;
+            if (target.type === "checkbox") {
+                globalProjectData.notebook_cells[idx][field] = target.checked;
+            } else {
+                globalProjectData.notebook_cells[idx][field] = target.value;
+            }
         }
         localStorage.setItem("sgemm_project_data", JSON.stringify(globalProjectData));
         renderPageContent(globalProjectData);
+    });
+    
+    formContainer.addEventListener("change", (e) => {
+        const target = e.target;
+        if (target.dataset.cellIdx !== undefined && target.type === "checkbox") {
+            const idx = target.dataset.cellIdx;
+            const field = target.dataset.field;
+            globalProjectData.notebook_cells[idx][field] = target.checked;
+            localStorage.setItem("sgemm_project_data", JSON.stringify(globalProjectData));
+            renderPageContent(globalProjectData);
+        }
     });
 }
 
