@@ -1,6 +1,10 @@
+let globalProjectData = null;
+let isEditMode = false;
+
 document.addEventListener("DOMContentLoaded", () => {
     initThemeToggle();
     loadProjectData();
+    initEditMode();
 });
 
 // Theme Switcher Logic
@@ -22,48 +26,113 @@ function initThemeToggle() {
 async function loadProjectData() {
     try {
         const response = await fetch('data.json');
-        const data = await response.json();
+        globalProjectData = await response.json();
         
-        populateBatchSelector(data.hyperparameters.batch_sizes);
-        populateFileTable(data.files);
-        populateGFGSection(data.gfg_breakdown_sections);
+        populateBatchSelector(globalProjectData.hyperparameters.batch_sizes);
+        populateFileTable(globalProjectData.files);
+        populateNotebookCells(globalProjectData.notebook_cells);
     } catch (error) {
         console.error("Error loading data.json, using fallback configuration.", error);
-        populateBatchSelector([100, 200, 400, 800, 1000, 1600]);
-        populateFileTable([
-            { filename: "SGEMM_GPU_Kernel_SGD_Analysis.ipynb", description: "Complete Jupyter notebook containing data preprocessing, custom SGD implementations, and plotting." },
-            { filename: "sgd_sgemm_analysis.py", description: "Standalone Python script version of complete SGD training pipeline." },
-            { filename: "sgemm_product.csv", description: "Full SGEMM GPU Kernel Performance dataset (241,600 rows)." },
-            { filename: "Readme_dataset.txt", description: "Original dataset description and source documentation." }
-        ]);
     }
 }
 
-function populateGFGSection(sections) {
-    const container = document.getElementById("gfgAccordionContainer");
-    if (!container || !sections) return;
+function populateNotebookCells(cells) {
+    const container = document.getElementById("cellsContainer");
+    if (!container || !cells) return;
     container.innerHTML = "";
 
-    sections.forEach((sec, idx) => {
+    cells.forEach((cell, idx) => {
         const item = document.createElement("div");
         item.className = "gfg-item";
+        
+        const isCode = cell.cell_type === "code";
+        
         item.innerHTML = `
             <div class="gfg-item-header">
-                <h3>${sec.title}</h3>
+                <h3>${cell.title}</h3>
+                <span class="cell-type-badge ${isCode ? 'badge-code' : 'badge-markdown'}">${cell.cell_type.toUpperCase()}</span>
             </div>
             <div class="gfg-item-body">
                 <div class="gfg-block">
-                    <h4>Mathematical Intuition</h4>
-                    <p>${sec.intuition}</p>
-                    <div class="gfg-formula"><code>${sec.formula}</code></div>
+                    <h4>Mathematical & Conceptual Intuition</h4>
+                    <p contenteditable="${isEditMode}" class="editable-field" data-index="${idx}" data-field="intuition">${cell.intuition || 'Cell execution explanation and underlying mechanics.'}</p>
                 </div>
                 <div class="gfg-block code-block-wrapper">
-                    <h4>Python / NumPy Code Implementation (.ipynb)</h4>
-                    <pre><code>${sec.code_snippet}</code></pre>
+                    <h4>${isCode ? 'Python Code (.ipynb)' : 'Markdown Source Content'}</h4>
+                    <pre><code contenteditable="${isEditMode}" class="editable-field" data-index="${idx}" data-field="source">${escapeHtml(cell.source)}</code></pre>
                 </div>
+                ${cell.output ? `
+                <div class="gfg-block output-block">
+                    <h4>Execution Output</h4>
+                    <pre><code>${escapeHtml(cell.output)}</code></pre>
+                </div>` : ''}
             </div>
         `;
         container.appendChild(item);
+    });
+}
+
+function escapeHtml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function initEditMode() {
+    const toggleBtn = document.getElementById("toggleEditBtn");
+    const downloadBtn = document.getElementById("downloadJsonBtn");
+
+    toggleBtn.addEventListener("click", () => {
+        isEditMode = !isEditMode;
+        if (isEditMode) {
+            toggleBtn.textContent = "💾 Edit Mode: ON (Click to Save/Disable)";
+            toggleBtn.style.background = "#2ea043";
+            downloadBtn.style.display = "inline-block";
+            enableEditing(true);
+        } else {
+            toggleBtn.textContent = "✎ Edit Mode: OFF";
+            toggleBtn.style.background = "";
+            enableEditing(false);
+            collectEdits();
+        }
+    });
+
+    downloadBtn.addEventListener("click", () => {
+        collectEdits();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(globalProjectData, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "data.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    });
+}
+
+function enableEditing(enable) {
+    document.querySelectorAll('.editable-field').forEach(el => {
+        el.setAttribute('contenteditable', enable);
+        if (enable) {
+            el.style.border = '1px dashed var(--accent-color)';
+            el.style.padding = '4px';
+        } else {
+            el.style.border = 'none';
+            el.style.padding = '0';
+        }
+    });
+}
+
+function collectEdits() {
+    if (!globalProjectData || !globalProjectData.notebook_cells) return;
+    document.querySelectorAll('.editable-field').forEach(el => {
+        const idx = el.getAttribute('data-index');
+        const field = el.getAttribute('data-field');
+        if (idx !== null && field !== null) {
+            globalProjectData.notebook_cells[idx][field] = el.innerText;
+        }
     });
 }
 
