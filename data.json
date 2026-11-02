@@ -43,33 +43,29 @@
     {
       "id": "loss-function",
       "title": "1. Loss Function: Mean Squared Error (MSE)",
-      "geeksforgeeks_ref": "GeeksforGeeks ML Basics - Linear Regression & Error Metrics",
-      "intuition": "To measure how well our linear model predicts GPU kernel runtime execution, we calculate the Average Mean Squared Error (MSE). Including the scaling factor 1/(2n) elegantly simplifies the derivative calculation during backpropagation.",
-      "formula": "L = \\frac{1}{2n} \\sum_{i=1}^{n} (y^{(i)} - y_i)^2",
+      "intuition": "To measure how well our linear model predicts GPU kernel runtime execution, we calculate the Average Mean Squared Error. Including the scaling factor 1/(2n) elegantly simplifies the derivative calculation during backpropagation.",
+      "formula": "L = (1 / 2n) * \\sum (y_{pred} - y_{true})^2",
       "code_snippet": "def MSE(X, Y, W, bias):\n    n = len(Y)\n    y_pred = X.dot(W) + bias\n    y_diff = y_pred - Y\n    return (1 / (2 * n)) * np.sum(y_diff ** 2)"
     },
     {
       "id": "gradient-derivatives",
       "title": "2. Gradient Derivation (Weights & Bias)",
-      "geeksforgeeks_ref": "GeeksforGeeks - Gradient Descent Update Rules",
-      "intuition": "Using chain rule calculus, we compute partial derivatives of the MSE loss with respect to weight vector W and scalar bias. This tells us the steepest direction of error increase, which we negate during parameter updates.",
-      "formula": "\\frac{\\partial L}{\\partial W} = \\frac{1}{n} X^T (y_{pred} - Y), \\quad \\frac{\\partial L}{\\partial b} = \\frac{1}{n} \\sum (y_{pred} - Y)",
+      "intuition": "Using chain rule calculus, we compute partial derivatives of the Mean Squared Error loss with respect to weight vector W and scalar bias. This determines the steepest direction of error increase, which we subtract during parameter updates.",
+      "formula": "∂L / ∂W = (1 / n) * X^T (y_{pred} - Y),     ∂L / ∂b = (1 / n) * \\sum (y_{pred} - Y)",
       "code_snippet": "def gradw(x, y, W, bias):\n    n = len(y)\n    y_pred = x.dot(W) + bias\n    return (1 / n) * (x.T.dot(y_pred - y))\n\ndef gradb(x, y, W, bias):\n    n = len(y)\n    y_pred = x.dot(W) + bias\n    return (1 / n) * np.sum(y_pred - y)"
     },
     {
       "id": "strategy-replacement",
       "title": "3. SGD Strategy 1: Random With Replacement",
-      "geeksforgeeks_ref": "GeeksforGeeks - Stochastic Gradient Descent Variants",
-      "intuition": "In RWR, sample indices are drawn uniformly at random with replacement using np.random.choice(). This models a true Poisson binomial sampling process where individual instances can appear multiple times per epoch.",
-      "formula": "i_k \\sim \\text{Uniform}(1, m) \\text{ with replacement for } k \\in [1, \\lceil m/b \\rceil]",
+      "intuition": "In Random With Replacement, sample indices are drawn uniformly at random with replacement using np.random.choice(). This models a true probabilistic sampling process where individual instances can appear multiple times per epoch.",
+      "formula": "Index k ~ Uniform(1, m) with replacement for k in [1, ceiling(m / batch_size)]",
       "code_snippet": "def sgd_RWR(X, Y, alpha=0.01, epochs=100, batch_size=240, bias=0):\n    m, n = X.shape\n    w = np.zeros(n)\n    itt_per_epoch = int(np.ceil(m / batch_size))\n    loss_plot = []\n    for i in range(epochs):\n        for j in range(itt_per_epoch):\n            indexes = np.random.choice(m, size=batch_size, replace=True)\n            X_batch, Y_batch = X[indexes], Y[indexes]\n            w -= alpha * gradw(X_batch, Y_batch, w, bias)\n            bias -= alpha * gradb(X_batch, Y_batch, w, bias)\n        loss_plot.append(MSE(X, Y, w, bias))\n    return w, bias, loss_plot"
     },
     {
       "id": "strategy-without-replacement",
       "title": "4. SGD Strategy 2: Random Without Replacement",
-      "geeksforgeeks_ref": "GeeksforGeeks - Permutation-based Mini-Batch SGD",
-      "intuition": "RWOR shuffles the dataset indices once at the beginning of every epoch using np.random.permutation(). Traversing sequential chunks guarantees every sample is visited exactly once per epoch, lowering variance.",
-      "formula": "\\pi = \\text{Permutation}([1, \\dots, m]), \\quad \\text{Batch}_j = X[j : j + b]",
+      "intuition": "Random Without Replacement shuffles the dataset indices once at the beginning of every epoch using np.random.permutation(). Traversing sequential chunks guarantees every sample is visited exactly once per epoch, lowering variance.",
+      "formula": "Permutation π = Shuffle([1, ..., m]), Batch j = X[j : j + batch_size]",
       "code_snippet": "def sgd_RWOR(X, Y, alpha=0.01, epochs=100, batch_size=240, bias=0):\n    m, n = X.shape\n    w = np.zeros(n)\n    loss_plot = []\n    for i in range(epochs):\n        indexes = np.random.permutation(m)\n        X_perm, Y_perm = X[indexes], Y[indexes]\n        for j in range(0, m, batch_size):\n            X_batch = X_perm[j:j+batch_size]\n            Y_batch = Y_perm[j:j+batch_size]\n            w -= alpha * gradw(X_batch, Y_batch, w, bias)\n            bias -= alpha * gradb(X_batch, Y_batch, w, bias)\n        loss_plot.append(MSE(X, Y, w, bias))\n    return w, bias, loss_plot"
     }
   ],

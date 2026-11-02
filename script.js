@@ -50,7 +50,6 @@ function populateGFGSection(sections) {
         item.innerHTML = `
             <div class="gfg-item-header">
                 <h3>${sec.title}</h3>
-                <span class="gfg-ref-tag">${sec.geeksforgeeks_ref}</span>
             </div>
             <div class="gfg-item-body">
                 <div class="gfg-block">
@@ -58,7 +57,7 @@ function populateGFGSection(sections) {
                     <p>${sec.intuition}</p>
                     <div class="gfg-formula"><code>${sec.formula}</code></div>
                 </div>
-                <div class="gfg-block">
+                <div class="gfg-block code-block-wrapper">
                     <h4>Python / NumPy Code Implementation (.ipynb)</h4>
                     <pre><code>${sec.code_snippet}</code></pre>
                 </div>
