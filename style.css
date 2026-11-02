@@ -42,6 +42,21 @@ body {
     padding: 0 20px;
 }
 
+/* Edit Mode Toolbar */
+.edit-toolbar {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+    background: var(--card-bg);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
 /* Hero Section */
 .hero {
     background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-color) 100%);
@@ -220,7 +235,7 @@ body {
     margin-bottom: 10px;
 }
 
-/* Code & Mathematical Intuition Breakdown Styles (Stacked Vertical Layout) */
+/* Notebook Cells Breakdown Styles */
 .gfg-header {
     margin-bottom: 20px;
 }
@@ -244,6 +259,9 @@ body {
 }
 
 .gfg-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 16px;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
@@ -251,10 +269,29 @@ body {
 
 .gfg-item-header h3 {
     color: var(--text-heading);
-    font-size: 1.2rem;
+    font-size: 1.15rem;
+    font-family: 'Fira Code', monospace;
 }
 
-/* Vertical Stack Structure */
+.cell-type-badge {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.badge-code {
+    background: rgba(88, 166, 255, 0.15);
+    color: var(--accent-color);
+    border: 1px solid rgba(88, 166, 255, 0.3);
+}
+
+.badge-markdown {
+    background: rgba(227, 179, 65, 0.15);
+    color: #e3b341;
+    border: 1px solid rgba(227, 179, 65, 0.3);
+}
+
 .gfg-item-body {
     display: flex;
     flex-direction: column;
@@ -276,15 +313,9 @@ body {
     line-height: 1.5;
 }
 
-.gfg-formula {
-    background: var(--card-bg);
-    padding: 12px 16px;
-    border-radius: 4px;
-    border-left: 3px solid var(--accent-color);
-    font-family: 'Fira Code', monospace;
-    font-size: 0.95rem;
-    color: var(--text-heading);
-    letter-spacing: 0.3px;
+.output-block pre {
+    background: #07090f;
+    border-left: 3px solid #2ea043;
 }
 
 .gfg-block pre {
